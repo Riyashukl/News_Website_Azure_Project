@@ -1,0 +1,46 @@
+name: Azure Static Web Apps CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    branches:
+      - main
+
+jobs:
+  build_and_deploy_job:
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
+    runs-on: ubuntu-latest
+    name: Build and Deploy Job
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+          lfs: false
+      - name: Build And Deploy
+        id: builddeploy
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_WHITE_HILL_0FE987D10 }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)
+          action: "upload"
+          ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
+          # For more information regarding Static Web App workflow configurations, please visit: https://aka.ms/swaworkflowconfig
+          app_location: "C:\Blogs website" # App source code path
+          api_location: "" # Api source code path - optional
+          output_location: "/const API_KEY = "1d3a0eefa97b499d8fbc4ee93eeb40b7"; const url = "https://newsapi.org/v2/everything?q=";  window.addEventListener("load", () => fetchNews("India"));  function reload() {     window.location.reload(); }  async function fetchNews(query) {     const res = await fetch(`${url}${query}&apiKey=${API_KEY}`);     const data = await res.json();     bindData(data.articles); }  function bindData(articles) {     const cardsContainer = document.getElementById("cards-container");     const newsCardTemplate = document.getElementById("template-news-card");      cardsContainer.innerHTML = "";      articles.forEach((article) => {         if (!article.urlToImage) return;         const cardClone = newsCardTemplate.content.cloneNode(true);         fillDataInCard(cardClone, article);         cardsContainer.appendChild(cardClone);     }); }  function fillDataInCard(cardClone, article) {     const newsImg = cardClone.querySelector("#news-img");     const newsTitle = cardClone.querySelector("#news-title");     const newsSource = cardClone.querySelector("#news-source");     const newsDesc = cardClone.querySelector("#news-desc");      newsImg.src = article.urlToImage;     newsTitle.innerHTML = article.title;     newsDesc.innerHTML = article.description;      const date = new Date(article.publishedAt).toLocaleString("en-US", {         timeZone: "Asia/Jakarta",     });      newsSource.innerHTML = `${article.source.name} · ${date}`;      cardClone.firstElementChild.addEventListener("click", () => {         window.open(article.url, "_blank");     }); }  let curSelectedNav = null; function onNavItemClick(id) {     fetchNews(id);     const navItem = document.getElementById(id);     curSelectedNav?.classList.remove("active");     curSelectedNav = navItem;     curSelectedNav.classList.add("active"); }  const searchButton = document.getElementById("search-button"); const searchText = document.getElementById("search-text");  searchButton.addEventListener("click", () => {     const query = searchText.value;     if (!query) return;     fetchNews(query);     curSelectedNav?.classList.remove("active");     curSelectedNav = null; });" # Built app content directory - optional
+          ###### End of Repository/Build Configurations ######
+
+  close_pull_request_job:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    name: Close Pull Request Job
+    steps:
+      - name: Close Pull Request
+        id: closepullrequest
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_WHITE_HILL_0FE987D10 }}
+          action: "close"
